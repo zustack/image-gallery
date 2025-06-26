@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import {
   AlertDialog,
@@ -19,6 +19,7 @@ import type { ErrorResponse } from "@/lib/types";
 import Spinner from "./spinner";
 import { createPost, getSignUrl, uploadImageZustack } from "@/api/posts";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuthStore } from "@/store/auth";
 
 export default function CreatePost() {
   const [body, setBody] = useState("");
@@ -26,6 +27,46 @@ export default function CreatePost() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
+  const socketRef = useRef<WebSocket | null>(null);
+  const { userId } = useAuthStore();
+
+  useEffect(() => {
+    const connect = () => {
+      const socket = new WebSocket(`ws://localhost:8081/ws?user_id=${userId}`);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        console.log("✅ WebSocket conectado");
+      };
+
+      socket.onmessage = (event) => {
+        console.log("📨 Mensaje recibido:", event.data);
+        if (event.data == "success") {
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+          setIsOpen(false);
+          setIsPending(false);
+          setFile(undefined);
+          setBody("");
+        }
+      };
+
+      socket.onerror = (err) => {
+        console.error("❌ Error en WebSocket:", err);
+      };
+
+      socket.onclose = () => {
+        console.log("🔌 Conexión cerrada. Reconectando en 3s...");
+        setTimeout(connect, 3000); // reconecta después de 3s
+      };
+    };
+
+    connect(); // conectar al montar
+
+    return () => {
+      socketRef.current?.close(); // cerrar al desmontar
+    };
+  }, [userId]);
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -36,7 +77,7 @@ export default function CreatePost() {
 
   const queryClient = useQueryClient();
 
-  // primero hace el request para obtener un token con scope write
+  // 1. get the jwt for the zustack request
   const getSignUrlMutation = useMutation({
     mutationFn: () => getSignUrl("Write"),
     onSuccess: (response) => {
@@ -49,7 +90,7 @@ export default function CreatePost() {
     },
   });
 
-  // 2. subi la imagen a zustack y guarda el file id
+  // 2. upload the image to zustack
   const uploadImageZustackMutation = useMutation({
     mutationFn: (jwt: string) => {
       if (!file) throw new Error("No file provided");
@@ -66,16 +107,9 @@ export default function CreatePost() {
     },
   });
 
-  // 3. crea el nuevo post en image gallery con file id y body
+  // 3. create the new image gallery post with the file id and body
   const createPostMutation = useMutation({
     mutationFn: (file_id: string) => createPost(file_id, body),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["files"] });
-      setIsOpen(false);
-      setIsPending(false);
-      setFile(undefined);
-      setBody("");
-    },
     onError: (error: ErrorResponse) => {
       setIsPending(false);
       toast.error(error.response.data || "An unexpected error occurred.");

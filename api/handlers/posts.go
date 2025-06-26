@@ -2,36 +2,52 @@ package handlers
 
 import (
 	"image-gallery/api/inputs"
+	"image-gallery/api/ws"
 	"image-gallery/database"
 	"image-gallery/utils"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+func SignUrl(c *fiber.Ctx) error {
+	scope := c.Params("scope")
+
+	secondsToByValid := 60
+	token, err := utils.GenerateJWT(os.Getenv("API_KEY_ZUSTACK"), scope, "", secondsToByValid)
+	if err != nil {
+		return c.Status(401).SendString(err.Error())
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"jwt": token,
+	})
+}
+
 func DeletePost(c *fiber.Ctx) error {
 	user := c.Locals("user").(*database.User)
-  postID := c.Params("postID")
-  post, err := database.GetPostByID(postID)
-  if err != nil {
-    return c.Status(500).SendString(err.Error())
-  }
+	postID := c.Params("postID")
+	post, err := database.GetPostByID(postID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
 
-  if user.ID != post.UserID {
-    return c.Status(403).SendString("You don't have permission to delete this post")
-  }
-  
-  err = utils.DeleteFile(post.FileID)
-  if err != nil {
-    return c.Status(500).SendString(err.Error())
-  }
+	if user.ID != post.UserID {
+		return c.Status(403).SendString("You don't have permission to delete this post")
+	}
 
-  err = database.DeletePost(postID)
-  if err != nil {
-    return c.Status(500).SendString(err.Error())
-  }
+	err = utils.DeleteFile(post.FileID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
 
-  return c.SendStatus(200)
+	err = database.DeletePost(postID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	return c.SendStatus(200)
 }
 
 func WebhookZustack(c *fiber.Ctx) error {
@@ -45,7 +61,7 @@ func WebhookZustack(c *fiber.Ctx) error {
 		return c.Status(401).SendString("You are not logged in.")
 	}
 
-	_, err := utils.ParseAndValidateToken(tokenString, os.Getenv("ZUSTACK_API_KEY"))
+	_, err := utils.ParseAndValidateToken(tokenString, os.Getenv("API_KEY_ZUSTACK"))
 	if err != nil {
 		return c.Status(403).SendString(err.Error())
 	}
@@ -55,16 +71,30 @@ func WebhookZustack(c *fiber.Ctx) error {
 		return c.Status(500).SendString(err.Error())
 	}
 
+  post, err := database.GetPostByFileID(fileID)
+  if err != nil {
+		return c.Status(500).SendString(err.Error())
+  }
+
+  ws.SendToUser(post.UserID, status)
+
 	return c.SendStatus(200)
 }
 
 func GetPosts(c *fiber.Ctx) error {
+  time.Sleep(5 * time.Second)
 	posts, err := database.GetPosts()
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
+	secondsToByValid := 60 * 60
+	token, err := utils.GenerateJWT(os.Getenv("API_KEY_ZUSTACK"), "Read", "", secondsToByValid)
+	if err != nil {
+		return c.Status(401).SendString(err.Error())
+	}
 	return c.Status(200).JSON(fiber.Map{
 		"data": posts,
+		"jwt":  token,
 	})
 }
 

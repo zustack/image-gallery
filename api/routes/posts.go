@@ -8,8 +8,9 @@ import (
 )
 
 func PostRoutes(app *fiber.App) {
+	app.Post("/posts/signurl/:scope", middleware.User, handlers.SignUrl)
 	app.Delete("/posts", middleware.User, handlers.DeletePost)
-  app.Post("/posts/webhook", handlers.WebhookZustack)
+	app.Post("/posts/webhook", handlers.WebhookZustack)
 	app.Get("/posts", middleware.User, handlers.GetPosts)
 	app.Post("/posts", middleware.User, handlers.CreatePost)
 }

@@ -1,14 +1,23 @@
-export default function Spinner() {
+type SpinnerProps = {
+  color?: string; 
+};
+
+export default function Spinner({ color = "#000" }: SpinnerProps) {
+
+  const barStyle = {
+    backgroundColor: color,
+  };
+
   return (
-      <div className="spinner">
-      <div className="bar1"></div>
-      <div className="bar2"></div>
-      <div className="bar3"></div>
-      <div className="bar4"></div>
-      <div className="bar5"></div>
-      <div className="bar6"></div>
-      <div className="bar7"></div>
-      <div className="bar8"></div>
+    <div className="spinner">
+      <div className="bar1" style={barStyle}></div>
+      <div className="bar2" style={barStyle}></div>
+      <div className="bar3" style={barStyle}></div>
+      <div className="bar4" style={barStyle}></div>
+      <div className="bar5" style={barStyle}></div>
+      <div className="bar6" style={barStyle}></div>
+      <div className="bar7" style={barStyle}></div>
+      <div className="bar8" style={barStyle}></div>
     </div>
   );
 }

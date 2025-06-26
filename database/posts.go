@@ -17,6 +17,18 @@ type Post struct {
 	CreatedAt string `json:"created_at"`
 }
 
+func GetPostByFileID(fileID string) (Post, error) {
+	var p Post
+	row := DB.QueryRow(`SELECT id, user_id, body, media_url, status, file_id, created_at FROM posts WHERE file_id = ?`, fileID)
+	if err := row.Scan(&p.ID, &p.UserID, &p.Body, &p.MediaUrl, &p.Status, &p.FileID, &p.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+      return p, fmt.Errorf("no post found with the file ID: %s", fileID)
+		}
+		return p, fmt.Errorf("an unexpected error occurred: %v", err)
+	}
+	return p, nil
+}
+
 func GetPostByID(id string) (Post, error) {
 	var p Post
 	row := DB.QueryRow(`SELECT id, user_id, body, media_url, status, file_id, created_at FROM posts WHERE id = ?`, id)
@@ -44,10 +56,9 @@ func DeletePost(id string) error {
 	return nil
 }
 
-
 func GetPosts() ([]Post, error) {
 	var posts []Post
-	rows, err := DB.Query(`SELECT * FROM posts;`)
+	rows, err := DB.Query(`SELECT * FROM posts WHERE status = 'success' ORDER BY created_at DESC;`)
 	if err != nil {
 		return nil, fmt.Errorf("error: %v", err)
 	}

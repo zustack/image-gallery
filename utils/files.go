@@ -16,10 +16,10 @@ func DeleteFile(fileID string) error {
 		return err
 	}
 
-  endpoint := fmt.Sprintf("%s/delete/file/%s/%s", os.Getenv("ZUSTACK_URL"), fileID, os.Getenv("BUCKET_ID"))
-  req, err := http.NewRequest("POST", endpoint, nil)
+	endpoint := fmt.Sprintf("%s/delete/file/%s/%s", os.Getenv("ZUSTACK_URL"), fileID, os.Getenv("BUCKET_ID"))
+	req, err := http.NewRequest("POST", endpoint, nil)
 	if err != nil {
-    return err
+		return err
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", signJWT))
@@ -27,14 +27,14 @@ func DeleteFile(fileID string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-    return err
+		return err
 	}
 	defer resp.Body.Close()
 
-  if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body) 
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("unexpected status code %d: %s", resp.StatusCode, string(bodyBytes))
 	}
 
-  return nil
+	return nil
 }

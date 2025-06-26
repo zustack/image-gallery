@@ -1,8 +1,13 @@
 import { authAxios } from "@/lib/axios-instance";
 import axios from "axios";
 
+export const getPosts = async () => {
+  const response = await authAxios.get("/posts");
+  return response.data;
+};
+
 export const getSignUrl = async (scope: string) => {
-  const response = await authAxios.post(`/posts/jwt/${scope}`);
+  const response = await authAxios.post(`/posts/signurl/${scope}`);
   return response.data;
 };
 

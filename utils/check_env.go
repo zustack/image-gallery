@@ -20,5 +20,3 @@ func CheckRequiredEnv(vars []string) error {
 
 	return nil
 }
-
-

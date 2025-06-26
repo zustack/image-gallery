@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
+import Spinner from "./spinner";
 
 export default function Navbar() {
   const { isAuth, logout } = useAuthStore();
@@ -24,16 +25,18 @@ export default function Navbar() {
           >
             About
           </Button>
-          {isAuth && (
-            <Button
-              variant={
-                location.pathname === "/gallery" ? "default" : "secondary"
+          <Button
+            variant={location.pathname === "/gallery" ? "default" : "secondary"}
+            onClick={() => {
+              if (!isAuth) {
+                navigate("/login");
+              } else {
+                navigate("/gallery");
               }
-              onClick={() => navigate("/gallery")}
-            >
-              Gallery
-            </Button>
-          )}
+            }}
+          >
+            Gallery
+          </Button>
         </div>
         {isAuth ? (
           <DropdownMenu>
@@ -65,10 +68,18 @@ export default function Navbar() {
           </DropdownMenu>
         ) : (
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => navigate("/signup")}>
+            <Button
+              variant={
+                location.pathname === "/signup" ? "default" : "secondary"
+              }
+              onClick={() => navigate("/signup")}
+            >
               Sign Up
             </Button>
-            <Button variant="secondary" onClick={() => navigate("/signin")}>
+            <Button
+              variant={location.pathname === "/login" ? "default" : "secondary"}
+              onClick={() => navigate("/signin")}
+            >
               Sign In
             </Button>
           </div>

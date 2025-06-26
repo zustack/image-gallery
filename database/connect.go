@@ -13,12 +13,12 @@ func ConnectDB(dbPath string) error {
 
 	DB, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return err 
+		return err
 	}
 
 	if err = DB.Ping(); err != nil {
-		return err 
+		return err
 	}
 
-  return nil
+	return nil
 }
