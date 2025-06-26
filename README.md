@@ -1,4 +1,4 @@
-# Image Gallery with Zustack
+# Video Gallery with Zustack
 
 This is a practical example of how to integrate the **Zustack API** into 
 a full-stack application using **Go** and **React**.
@@ -29,3 +29,13 @@ export ZUSTACK_URL=zustack_url
 
 > You can also put these variables in a `.env.sh` file and run `source .env.sh` 
 to load them automatically.
+
+## How to use
+Clone the repo and run
+```bash
+git clone https://github.com/zustack/image-gallery.git ~/image-gallery
+cd image-gallery
+go run cmd/main.go
+```
+
+Now open the on http://localhost:8081.

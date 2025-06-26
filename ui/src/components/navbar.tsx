@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { CircleUser, LogOut, User } from "lucide-react";
 import {
@@ -9,10 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
-import Spinner from "./spinner";
 
 export default function Navbar() {
-  const { isAuth, logout } = useAuthStore();
+  const { isAuth, logout, email } = useAuthStore();
   const navigate = useNavigate();
 
   return (
@@ -47,12 +46,10 @@ export default function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <Link to="/profile">
                 <DropdownMenuItem className="flex gap-2">
                   <User className="h-4 w-4 text-zinc-300" />
-                  Profile
+                  Hello {email}
                 </DropdownMenuItem>
-              </Link>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
@@ -78,9 +75,9 @@ export default function Navbar() {
             </Button>
             <Button
               variant={location.pathname === "/login" ? "default" : "secondary"}
-              onClick={() => navigate("/signin")}
+              onClick={() => navigate("/login")}
             >
-              Sign In
+              Login
             </Button>
           </div>
         )}

@@ -17,16 +17,27 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import type { ErrorResponse } from "@/lib/types";
 import Spinner from "./spinner";
-import { createPost, getSignUrl, uploadImageZustack } from "@/api/posts";
+import {
+  createPost,
+  getResolution,
+  getSignUrl,
+  uploadVideoZustack,
+} from "@/api/posts";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthStore } from "@/store/auth";
+import generateFixedResolutions from "@/lib/resolution";
+import { CHUNK_SIZE } from "@/api/posts";
 
 export default function CreatePost() {
+  const jwt = useRef<string | null>(null);
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File>();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
+  const [thumbnail, setThumbnail] = useState<File>();
+  const thumbnailRef = useRef<HTMLInputElement>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
   const { userId } = useAuthStore();
@@ -37,34 +48,34 @@ export default function CreatePost() {
       socketRef.current = socket;
 
       socket.onopen = () => {
-        console.log("✅ WebSocket conectado");
+        console.log("connected");
       };
 
       socket.onmessage = (event) => {
-        console.log("📨 Mensaje recibido:", event.data);
         if (event.data == "success") {
           queryClient.invalidateQueries({ queryKey: ["posts"] });
           setIsOpen(false);
           setIsPending(false);
           setFile(undefined);
           setBody("");
+          setThumbnail(undefined)
         }
       };
 
       socket.onerror = (err) => {
-        console.error("❌ Error en WebSocket:", err);
+        console.error("Error in websocket: ", err);
       };
 
       socket.onclose = () => {
-        console.log("🔌 Conexión cerrada. Reconectando en 3s...");
-        setTimeout(connect, 3000); // reconecta después de 3s
+        console.log("Reconecting in 3s");
+        setTimeout(connect, 3000);
       };
     };
 
-    connect(); // conectar al montar
+    connect();
 
     return () => {
-      socketRef.current?.close(); // cerrar al desmontar
+      socketRef.current?.close();
     };
   }, [userId]);
 
@@ -75,13 +86,21 @@ export default function CreatePost() {
     }
   };
 
+  const handleThumbnail = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
+    if (file) {
+      setThumbnail(file);
+    }
+  };
+
   const queryClient = useQueryClient();
 
   // 1. get the jwt for the zustack request
   const getSignUrlMutation = useMutation({
     mutationFn: () => getSignUrl("Write"),
     onSuccess: (response) => {
-      uploadImageZustackMutation.mutate(response.jwt);
+      jwt.current = response.jwt;
+      getResolutionMutation.mutate(response.jwt);
       setIsPending(true);
     },
     onError: (error: ErrorResponse) => {
@@ -90,20 +109,62 @@ export default function CreatePost() {
     },
   });
 
-  // 2. upload the image to zustack
-  const uploadImageZustackMutation = useMutation({
-    mutationFn: (jwt: string) => {
+  // 0. get the resolution of the video and add 2 based calidades
+  const getResolutionMutation = useMutation({
+    mutationFn: () => {
       if (!file) throw new Error("No file provided");
-      if (file.size >= 50 * 1024 * 1024)
-        throw new Error("Image size must be less than 50 MiB");
-      return uploadImageZustack(jwt, file);
+      if (!jwt.current) throw new Error("Missing JWT");
+      const chunkBlob =
+        file.size > CHUNK_SIZE ? file.slice(0, CHUNK_SIZE) : file;
+      const chunkFile = new File([chunkBlob], file.name, { type: file.type });
+      return getResolution(chunkFile, jwt.current);
     },
     onSuccess: (response) => {
-      createPostMutation.mutate(response.file_id);
+      const resolutions = generateFixedResolutions(response.resolution);
+      uploadVideoZustackMutation.mutate(resolutions);
     },
     onError: (error: ErrorResponse) => {
       setIsPending(false);
       toast.error(error.response.data || "An unexpected error occurred.");
+    },
+  });
+
+  // 2. upload the image to zustack
+  const uploadVideoZustackMutation = useMutation({
+    mutationFn: async (resolution: string) => {
+      if (!file) throw new Error("No file provided");
+      if (!jwt.current) throw new Error("No token provided");
+
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      const uuid = crypto.randomUUID();
+
+      let lastChunkResponse: any = null;
+
+      for (let chunkNumber = 0; chunkNumber < totalChunks; chunkNumber++) {
+        const res = await uploadVideoZustack({
+          jwt: jwt.current,
+          file,
+          resolution,
+          chunkNumber,
+          totalChunks,
+          uuid,
+          thumbnail
+        });
+
+        if (chunkNumber === totalChunks - 1) {
+          lastChunkResponse = res;
+        }
+      }
+      return lastChunkResponse;
+    },
+    onSuccess: async (response) => {
+      if (response?.file_id) {
+        createPostMutation.mutate(response.file_id);
+      }
+    },
+    onError: (error: ErrorResponse) => {
+      setIsPending(false);
+      toast.error(error.response?.data || "An unexpected error occurred.");
     },
   });
 
@@ -115,6 +176,7 @@ export default function CreatePost() {
       toast.error(error.response.data || "An unexpected error occurred.");
     },
   });
+
 
   return (
     <AlertDialog
@@ -139,7 +201,7 @@ export default function CreatePost() {
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="file">File</Label>
+                        <Label htmlFor="file">Video to Upload</Label>
                         <Button
                           id="file"
                           onClick={() => fileRef.current?.click()}
@@ -151,7 +213,7 @@ export default function CreatePost() {
                             {file?.name ? (
                               <>{file?.name.slice(0, 40)}</>
                             ) : (
-                              <>JPEG, PNG, WEBP, GIF, SVG+XML</>
+                              <>MP4, WEBM, OGG, MATROSKA, QUICKTIME</>
                             )}
                           </span>
                         </Button>
@@ -162,12 +224,41 @@ export default function CreatePost() {
                           id="file"
                           type="file"
                           className="hidden"
+                          accept=".mkv,video/mp4,video/webm,video/ogg,video/x-matroska,video/quicktime"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="thumbnail">Video Thumbnail</Label>
+                        <Button
+                          id="thumbnail"
+                          onClick={() => thumbnailRef.current?.click()}
+                          variant="outline"
+                          className="flex justify-start gap-4"
+                        >
+                          <FileImage className="size-4" />
+                          <span>
+                            {thumbnail?.name ? (
+                              <>{thumbnail?.name.slice(0, 40)}</>
+                            ) : (
+                              <>JPEG, PNG, WEBP, GIF, SVG+XML</>
+                            )}
+                          </span>
+                        </Button>
+                        <Input
+                          ref={thumbnailRef}
+                          onChange={handleThumbnail}
+                          id="file"
+                          type="file"
+                          className="hidden"
                           accept="image/jpeg, image/png, image/webp, image/gif, image/svg+xml"
                         />
                       </div>
+
                       <div className="grid w-full gap-3">
                         <Label htmlFor="body">Body</Label>
                         <Textarea
+                          required
                           value={body}
                           onChange={(e) => setBody(e.target.value)}
                           placeholder="Type your body here."

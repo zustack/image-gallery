@@ -6,7 +6,6 @@ import (
 	"image-gallery/database"
 	"image-gallery/utils"
 	"os"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -82,7 +81,6 @@ func WebhookZustack(c *fiber.Ctx) error {
 }
 
 func GetPosts(c *fiber.Ctx) error {
-  time.Sleep(5 * time.Second)
 	posts, err := database.GetPosts()
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
