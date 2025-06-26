@@ -17,21 +17,14 @@ export default function Navbar() {
   return (
     <nav className="container mx-auto px-[10px] mt-[10px] xl:px-[200px]">
       <div className="flex justify-between items-center">
-        <div className="flex gap-[40px]">
-          <Link to="/" className="flex gap-2 text-[25px] font-bold">
-            <span className="">Zustack</span>
-          </Link>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => navigate("/")}>
+            Home
+          </Button>
           {isAuth && (
-            <div className="hidden md:flex gap-2 items-center">
-              <Button
-                onClick={() => navigate("/some")}
-                variant={
-                  location.pathname.includes("/some") ? "secondary" : "outline"
-                }
-              >
-                Some
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={() => navigate("/gallery")}>
+              Gallery
+            </Button>
           )}
         </div>
         {isAuth ? (
@@ -63,9 +56,14 @@ export default function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button variant="secondary" onClick={() => navigate("/login")}>
-            Sign In
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => navigate("/signup")}>
+              Sign Up
+            </Button>
+            <Button variant="secondary" onClick={() => navigate("/signin")}>
+              Sign In
+            </Button>
+          </div>
         )}
       </div>
     </nav>

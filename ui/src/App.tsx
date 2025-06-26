@@ -1,8 +1,11 @@
 import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { PrivateRoute } from "./lib/private-routes";
 import Landing from "./pages/landing";
 import Layout from "./components/layout";
-import { PrivateRoute } from "./lib/private-routes";
 import NotFound from "./pages/not-found";
+import Signup from "./pages/signup";
+import Login from "./pages/login";
+import Gallery from "./pages/gallery";
 
 function App() {
   return (
@@ -10,7 +13,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Landing />} />
-          <Route element={<PrivateRoute />}></Route>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/gallery" element={<Gallery />} />
+
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
