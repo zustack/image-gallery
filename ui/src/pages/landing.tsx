@@ -9,8 +9,7 @@ export default function Landing() {
         </h1>
         <p className="text-center text-foreground pt-[50px]">
           <span>
-            This is a practical example of how to integrate the 
-            Zustack API into
+            This is a practical example of how to integrate the Zustack API into
             a full-stack application using Go and React.
           </span>
           <span className="block">
