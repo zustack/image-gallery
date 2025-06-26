@@ -1,19 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { Github, GithubIcon } from "lucide-react";
 
 export default function Landing() {
   return (
     <section className="h-[calc(80vh)] flex justify-center items-center">
       <div>
-        <h1 className="scroll-m-20 text-3xl font-semibold lg:text-5xl text-center">
+        <h1 className="scroll-m-20 text-3xl font-semibold lg:text-4xl text-center">
           <span>Image Gallery</span>
         </h1>
-        <p className="text-center text-foreground pt-[50px] text-xl">
+        <p className="text-center text-foreground pt-[50px]">
           <span>
-            This is a practical example of how to integrate the Zustack API into
+            This is a practical example of how to integrate the 
+            Zustack API into
+            a full-stack application using Go and React.
           </span>
           <span className="block">
-            a full-stack application using Go and React.
+            Login to see the gallery and upload images.
           </span>
         </p>
         <div className="flex justify-center gap-4 pt-[50px]">

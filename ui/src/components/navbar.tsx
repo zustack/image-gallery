@@ -18,11 +18,19 @@ export default function Navbar() {
     <nav className="container mx-auto px-[10px] mt-[10px] xl:px-[200px]">
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => navigate("/")}>
-            Home
+          <Button
+            variant={location.pathname === "/" ? "default" : "secondary"}
+            onClick={() => navigate("/")}
+          >
+            About
           </Button>
           {isAuth && (
-            <Button variant="secondary" onClick={() => navigate("/gallery")}>
+            <Button
+              variant={
+                location.pathname === "/gallery" ? "default" : "secondary"
+              }
+              onClick={() => navigate("/gallery")}
+            >
               Gallery
             </Button>
           )}
