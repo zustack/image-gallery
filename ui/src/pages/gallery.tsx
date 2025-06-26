@@ -13,8 +13,6 @@ export default function Gallery() {
     queryFn: () => getPosts(),
   });
 
-    console.log(data)
-
   return (
     <div className="container mx-auto px-[10px] xl:px-[200px] mt-[50px]">
       <div className="pb-[10px]">
