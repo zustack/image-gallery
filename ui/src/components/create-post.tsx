@@ -58,12 +58,11 @@ export default function CreatePost() {
           setIsPending(false);
           setFile(undefined);
           setBody("");
-          setThumbnail(undefined)
+          setThumbnail(undefined);
         }
       };
 
       socket.onerror = (err) => {
-<<<<<<< HEAD
         console.error("Error in websocket: ", err);
       };
 
@@ -77,21 +76,6 @@ export default function CreatePost() {
 
     return () => {
       socketRef.current?.close();
-=======
-        console.error("websocket error: ", err);
-      };
-
-      socket.onclose = () => {
-        console.log("🔌 Conexión cerrada. Reconectando en 3s...");
-        setTimeout(connect, 3000); 
-      };
-    };
-
-    connect(); 
-
-    return () => {
-      socketRef.current?.close(); 
->>>>>>> 540b635 (fix: fix token scope)
     };
   }, [userId]);
 
@@ -113,7 +97,7 @@ export default function CreatePost() {
 
   // 1. get the jwt for the zustack request
   const getSignUrlMutation = useMutation({
-    mutationFn: () => getSignUrl("write"),
+    mutationFn: () => getSignUrl("Write"),
     onSuccess: (response) => {
       jwt.current = response.jwt;
       getResolutionMutation.mutate(response.jwt);
@@ -164,7 +148,7 @@ export default function CreatePost() {
           chunkNumber,
           totalChunks,
           uuid,
-          thumbnail
+          thumbnail,
         });
 
         if (chunkNumber === totalChunks - 1) {
@@ -192,7 +176,6 @@ export default function CreatePost() {
       toast.error(error.response.data || "An unexpected error occurred.");
     },
   });
-
 
   return (
     <AlertDialog
