@@ -63,6 +63,7 @@ export default function CreatePost() {
       };
 
       socket.onerror = (err) => {
+<<<<<<< HEAD
         console.error("Error in websocket: ", err);
       };
 
@@ -76,6 +77,21 @@ export default function CreatePost() {
 
     return () => {
       socketRef.current?.close();
+=======
+        console.error("websocket error: ", err);
+      };
+
+      socket.onclose = () => {
+        console.log("🔌 Conexión cerrada. Reconectando en 3s...");
+        setTimeout(connect, 3000); 
+      };
+    };
+
+    connect(); 
+
+    return () => {
+      socketRef.current?.close(); 
+>>>>>>> 540b635 (fix: fix token scope)
     };
   }, [userId]);
 
@@ -97,7 +113,7 @@ export default function CreatePost() {
 
   // 1. get the jwt for the zustack request
   const getSignUrlMutation = useMutation({
-    mutationFn: () => getSignUrl("Write"),
+    mutationFn: () => getSignUrl("write"),
     onSuccess: (response) => {
       jwt.current = response.jwt;
       getResolutionMutation.mutate(response.jwt);

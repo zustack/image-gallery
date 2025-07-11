@@ -9,6 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
+<<<<<<< HEAD
+=======
+import toast from "react-hot-toast";
+>>>>>>> 540b635 (fix: fix token scope)
 
 export default function Navbar() {
   const { isAuth, logout, email } = useAuthStore();
@@ -29,6 +33,7 @@ export default function Navbar() {
             onClick={() => {
               if (!isAuth) {
                 navigate("/login");
+                toast.error("You must be logged in to view the Gallery.");
               } else {
                 navigate("/gallery");
               }
@@ -46,10 +51,17 @@ export default function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+<<<<<<< HEAD
                 <DropdownMenuItem className="flex gap-2">
                   <User className="h-4 w-4 text-zinc-300" />
                   Hello {email}
                 </DropdownMenuItem>
+=======
+              <DropdownMenuItem className="flex gap-2">
+                <User className="h-4 w-4 text-zinc-300" />
+                Hello {email}
+              </DropdownMenuItem>
+>>>>>>> 540b635 (fix: fix token scope)
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
