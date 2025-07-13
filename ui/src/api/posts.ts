@@ -17,7 +17,7 @@ export const uploadImageZustack = async (jwt: string, file: File) => {
   formData.append("access", "private");
   formData.append("webp", "yes");
   const response = await axios.post(
-    `http://localhost:8080/upload/image/${import.meta.env.VITE_ZUSTACK_BUCKET_ID}`,
+    `http://localhost:8080/files/upload/image/${import.meta.env.VITE_ZUSTACK_BUCKET_ID}`,
     formData,
     {
       headers: {

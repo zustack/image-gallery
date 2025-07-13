@@ -37,11 +37,10 @@ export default function CreatePost() {
       socketRef.current = socket;
 
       socket.onopen = () => {
-        console.log("✅ WebSocket conectado");
+        console.log("connected");
       };
 
       socket.onmessage = (event) => {
-        console.log("📨 Mensaje recibido:", event.data);
         if (event.data == "success") {
           queryClient.invalidateQueries({ queryKey: ["posts"] });
           setIsOpen(false);
@@ -52,19 +51,19 @@ export default function CreatePost() {
       };
 
       socket.onerror = (err) => {
-        console.error("❌ Error en WebSocket:", err);
+        console.error("error: ", err);
       };
 
       socket.onclose = () => {
-        console.log("🔌 Conexión cerrada. Reconectando en 3s...");
-        setTimeout(connect, 3000); // reconecta después de 3s
+        console.log("conection closed");
+        setTimeout(connect, 3000); 
       };
     };
 
-    connect(); // conectar al montar
+    connect(); 
 
     return () => {
-      socketRef.current?.close(); // cerrar al desmontar
+      socketRef.current?.close(); 
     };
   }, [userId]);
 
@@ -79,7 +78,7 @@ export default function CreatePost() {
 
   // 1. get the jwt for the zustack request
   const getSignUrlMutation = useMutation({
-    mutationFn: () => getSignUrl("Write"),
+    mutationFn: () => getSignUrl("write"),
     onSuccess: (response) => {
       uploadImageZustackMutation.mutate(response.jwt);
       setIsPending(true);

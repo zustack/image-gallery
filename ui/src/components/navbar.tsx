@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
-import Spinner from "./spinner";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { isAuth, logout } = useAuthStore();
@@ -29,6 +29,7 @@ export default function Navbar() {
             variant={location.pathname === "/gallery" ? "default" : "secondary"}
             onClick={() => {
               if (!isAuth) {
+                toast.error("You must be logged in to view the Gallery.");
                 navigate("/login");
               } else {
                 navigate("/gallery");
@@ -59,7 +60,7 @@ export default function Navbar() {
                   logout();
                   navigate("/");
                 }}
-                className="flex gap-2"
+                className="flex gap-2 cursor-pointer"
               >
                 <LogOut className="w-4 h-4 text-zinc-300" />
                 Logout
@@ -78,9 +79,9 @@ export default function Navbar() {
             </Button>
             <Button
               variant={location.pathname === "/login" ? "default" : "secondary"}
-              onClick={() => navigate("/signin")}
+              onClick={() => navigate("/login")}
             >
-              Sign In
+              Login
             </Button>
           </div>
         )}

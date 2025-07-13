@@ -28,7 +28,6 @@ export default function Gallery() {
           {isLoading && (
             <div className="flex flex-col gap-[5px]">
               <Skeleton className="rounded-md w-full h-[400px]" />
-
               <Skeleton className="rounded-md w-full h-[400px]" />
             </div>
           )}
