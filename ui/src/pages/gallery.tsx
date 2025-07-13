@@ -28,7 +28,6 @@ export default function Gallery() {
           {isLoading && (
             <div className="flex flex-col gap-[5px]">
               <Skeleton className="rounded-md w-full h-[400px]" />
-
               <Skeleton className="rounded-md w-full h-[400px]" />
             </div>
           )}
@@ -38,7 +37,7 @@ export default function Gallery() {
               <div className="flex flex-col gap-[5px]">
                 <LoadImage
                   cn="rounded-md w-full h-[400px]"
-                  src={`${post.media_url}&jwt=${data.jwt}`}
+                  src={`${post.media_url}?jwt=${data.jwt}`}
                 />
                 <p>{post.body}</p>
                 <p className="text-muted-foreground text-sm">
