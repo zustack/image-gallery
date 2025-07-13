@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { CircleUser, LogOut, User } from "lucide-react";
 import {
@@ -9,10 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
-import toast from "react-hot-toast";
+import Spinner from "./spinner";
 
 export default function Navbar() {
-  const { isAuth, logout, email } = useAuthStore();
+  const { isAuth, logout } = useAuthStore();
   const navigate = useNavigate();
 
   return (
@@ -30,7 +30,6 @@ export default function Navbar() {
             onClick={() => {
               if (!isAuth) {
                 navigate("/login");
-                toast.error("You must be logged in to view the Gallery.");
               } else {
                 navigate("/gallery");
               }
@@ -48,10 +47,12 @@ export default function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="flex gap-2">
-                <User className="h-4 w-4 text-zinc-300" />
-                Hello {email}
-              </DropdownMenuItem>
+              <Link to="/profile">
+                <DropdownMenuItem className="flex gap-2">
+                  <User className="h-4 w-4 text-zinc-300" />
+                  Profile
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
@@ -77,9 +78,9 @@ export default function Navbar() {
             </Button>
             <Button
               variant={location.pathname === "/login" ? "default" : "secondary"}
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/signin")}
             >
-              Login
+              Sign In
             </Button>
           </div>
         )}

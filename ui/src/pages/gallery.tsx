@@ -28,10 +28,10 @@ export default function Gallery() {
           {isLoading && (
             <div className="flex flex-col gap-[5px]">
               <Skeleton className="rounded-md w-full h-[400px]" />
+
               <Skeleton className="rounded-md w-full h-[400px]" />
             </div>
           )}
-
           {data?.data?.map((post: Post, index: number) => (
             <div key={post.id}>
               <div className="flex flex-col gap-[5px]">

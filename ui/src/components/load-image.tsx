@@ -12,7 +12,7 @@ export default function LoadImage({ src, cn }: { src: string, cn: string }) {
       />
       <img
         src={src}
-        alt="Image"
+        alt={"Image"}
         className="rounded-md"
         style={{ display: loading ? "none" : "block" }}
         onLoad={() => setLoading(false)}
